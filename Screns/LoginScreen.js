@@ -48,7 +48,7 @@ import {
   
     function onSubmit() {
       if (!dataInput.email || !dataInput.password)
-        return console.warn('Please fill in all fields!');
+        return console.warn('Будь ласка заповніть всі поля!');
   
       onHideKeyboard();
       setIsShowPass(true);
