@@ -2,9 +2,8 @@ import { Button, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
-
-import { PostsScreen } from "./PostsScreen";
-import { CreatePostsScreen } from "./CreatePostsScreen";
+import { PostsScreen } from "./PostScreen";
+import { CreatePostsScreen } from "./CreatePostScreen";
 import { ProfileScreen } from "./ProfileScreen";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
