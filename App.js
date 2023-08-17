@@ -1,6 +1,5 @@
 import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import { useFonts } from "expo-font";
 import { Navigation } from "./Components/Navigation.js";
@@ -24,12 +23,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    // alignItems: 'center',
-    // justifyContent: 'center',
-  },
-  bgimage: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
   },
 });
