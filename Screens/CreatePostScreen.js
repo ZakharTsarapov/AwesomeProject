@@ -13,6 +13,11 @@ import { Camera, CameraType } from "expo-camera";
 import { useEffect, useState } from "react";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
+import { db } from "../firebase/config";
+import { addDoc, collection } from "firebase/firestore";
+import { nickNameSelector, userIdSelector } from "../redux/auth/selectors";
+import { useDispatch, useSelector } from "react-redux";
+import { updateCollectionId } from "../redux/auth/sliceAuth";
 
 export function CreatePostsScreen() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -24,20 +29,23 @@ export function CreatePostsScreen() {
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState(null);
 
+  const nickName = useSelector(nickNameSelector);
+  const userId = useSelector(userIdSelector);
+
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       await MediaLibrary.requestPermissionsAsync();
-
       setHasPermission(status === "granted");
     })();
 
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Запит на отримання геолокації був відхилений");
+        console.log("Запит на доступ до геолокації був відхиленний");
       }
     })();
   }, []);
@@ -77,20 +85,33 @@ export function CreatePostsScreen() {
 
   function onPublish() {
     if (!photo || !location || !inputLocation || !inputTitlePhoto) {
-      console.warn("Потрібно зробити фото та заповнити всі поля!");
+      console.warn("Зробіть фото та заповніть поля");
       return;
     }
 
-    navigation.navigate("Posts", {
-      location,
-      photo,
-      inputTitlePhoto,
-      inputLocation,
-      address,
-    });
+    uploadDataToServer();
+    navigation.navigate("Posts");
     setInputTitlePhoto("");
     setInputLocation("");
     setPhoto(null);
+  }
+
+  async function uploadDataToServer() {
+    try {
+      const docRef = await addDoc(collection(db, "photoPosts"), {
+        photo,
+        inputTitlePhoto,
+        inputLocation,
+        location,
+        address,
+        nickName,
+        userId,
+      });
+
+      dispatch(updateCollectionId(docRef.id));
+    } catch (error) {
+      console.warn(error);
+    }
   }
 
   return (
@@ -123,12 +144,7 @@ export function CreatePostsScreen() {
             </View>
 
             <View style={styles.wrapBtnDownloadPhoto}>
-              <TouchableOpacity
-                activeOpacity={0.5}
-                onPress={() => {
-                  console.log("скачати фотографію");
-                }}
-              >
+              <TouchableOpacity activeOpacity={0.5} onPress={() => {}}>
                 <Text style={styles.btnDownloadPhoto}>Завантажте фото</Text>
               </TouchableOpacity>
             </View>
@@ -198,7 +214,8 @@ export function CreatePostsScreen() {
           <TouchableOpacity
             style={styles.btnTrush}
             activeOpacity={0.8}
-            onPress={() => {}}>
+            onPress={() => {}}
+          >
             <Feather name="trash-2" size={24} color="#BDBDBD" />
           </TouchableOpacity>
         </View>

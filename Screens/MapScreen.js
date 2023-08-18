@@ -1,25 +1,26 @@
-import { useRoute } from "@react-navigation/native";
-import { StyleSheet, View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { useRoute } from '@react-navigation/native';
+import { StyleSheet, View } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 
 export function MapScreen() {
   const { params } = useRoute();
+  const { latitude, longitude } = params.location;
 
   return (
     <View style={styles.container}>
       <MapView
         style={styles.mapView}
         initialRegion={{
-          latitude: `${params.location.latitude}`,
-          longitude: `${params.location.longitude}`,
+          latitude: `${latitude}`,
+          longitude: `${longitude}`,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
       >
         <Marker
           coordinate={{
-            latitude: `${params.location.latitude}`,
-            longitude: `${params.location.longitude}`,
+            latitude: `${latitude}`,
+            longitude: `${longitude}`,
           }}
           title="PhotoTitle"
         />

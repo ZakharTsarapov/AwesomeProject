@@ -9,27 +9,31 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-} from "react-native";
-import { useEffect, useState } from "react";
-import bgimage from "../assets/img/bg-image.jpg";
-import { useNavigation } from "@react-navigation/native";
+} from 'react-native';
+import { useEffect, useState } from 'react';
+import bgimage from '../assets/img/bg-image.jpg';
+import { useNavigation } from '@react-navigation/native';
+import { authSignInUser } from '../../redux/auth/operations';
+import { useDispatch } from 'react-redux';
 
 const initialState = {
-  email: "",
-  password: "",
+  email: '',
+  password: '',
 };
 
 export function LoginScreen() {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [dataInput, setDataInput] = useState(initialState);
   const [isShowPass, setIsShowPass] = useState(true);
+
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const showSubscription = Keyboard.addListener("keyboardWillShow", () => {
+    const showSubscription = Keyboard.addListener('keyboardWillShow', () => {
       setIsShowKeyboard(true);
     });
-    const hideSubscription = Keyboard.addListener("keyboardWillHide", () => {
+    const hideSubscription = Keyboard.addListener('keyboardWillHide', () => {
       setIsShowKeyboard(false);
     });
 
@@ -43,34 +47,31 @@ export function LoginScreen() {
     setIsShowKeyboard(true);
   }
 
-  function onHideKeyboard() {
-    setIsShowKeyboard(false);
-    Keyboard.dismiss();
-  }
-
   function onSubmit() {
     if (!dataInput.email || !dataInput.password)
-      return console.warn("Будь ласка заповніть всі поля!");
+      return console.warn('Заповніть всі поля!');
 
-    onHideKeyboard();
+    dispatch(authSignInUser(dataInput));
+
     setIsShowPass(true);
-    console.log("state :>> ", dataInput);
     setDataInput(initialState);
-
-    navigation.navigate("Home");
   }
 
   function onLogin() {
-    navigation.navigate("Registration");
+    navigation.navigate('Registration');
   }
 
   return (
     <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={onHideKeyboard}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
+      >
         <ImageBackground style={styles.imageBG} source={bgimage}>
           <KeyboardAvoidingView
             style={styles.wrapForm}
-            behavior={Platform.OS == "ios" ? "padding" : "height"}
+            behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
           >
             <View
               style={{
@@ -87,10 +88,11 @@ export function LoginScreen() {
                   style={styles.input}
                   textAlign="left"
                   placeholder="Адреса електронної пошти"
+                  keyboardType="email-address"
                   onFocus={onShowKeyboard}
                   value={dataInput.email}
-                  onChangeText={(value) =>
-                    setDataInput((prev) => ({ ...prev, email: value }))
+                  onChangeText={value =>
+                    setDataInput(prev => ({ ...prev, email: value }))
                   }
                 />
               </View>
@@ -98,7 +100,7 @@ export function LoginScreen() {
               <View
                 style={{
                   marginTop: 16,
-                  position: "relative",
+                  position: 'relative',
                 }}
               >
                 <TextInput
@@ -108,16 +110,16 @@ export function LoginScreen() {
                   secureTextEntry={isShowPass}
                   onFocus={onShowKeyboard}
                   value={dataInput.password}
-                  onChangeText={(value) =>
-                    setDataInput((prev) => ({ ...prev, password: value }))
+                  onChangeText={value =>
+                    setDataInput(prev => ({ ...prev, password: value }))
                   }
                 />
                 <TouchableOpacity
                   style={styles.show}
-                  onPress={() => setIsShowPass((prev) => !prev)}
+                  onPress={() => setIsShowPass(prev => !prev)}
                 >
                   <Text style={styles.showTitle}>
-                    {isShowPass ? "Показати" : "Приховати"}
+                    {isShowPass ? 'Показати' : 'Приховати'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -150,76 +152,76 @@ export function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   imageBG: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "flex-end",
+    resizeMode: 'cover',
+    justifyContent: 'flex-end',
   },
   title: {
-    color: "#212121",
+    color: '#212121',
     fontSize: 20,
   },
   wrapForm: {
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   form: {
     marginHorizontal: 16,
   },
   imgAvatar: {
-    position: "absolute",
+    position: 'absolute',
     top: -60,
-    left: "35%",
+    left: '35%',
   },
   titleForm: {
     marginTop: 32,
-    textAlign: "center",
-    fontFamily: "Roboto-500",
+    textAlign: 'center',
+    fontFamily: 'Roboto-500',
     fontSize: 30,
     letterSpacing: 0.3,
-    color: "#212121",
+    color: '#212121',
   },
   input: {
     paddingLeft: 16,
     height: 50,
     borderWidth: 1,
     borderRadius: 6,
-    fontFamily: "Roboto-400",
-    color: "#212121",
-    borderColor: "#E8E8E8",
-    backgroundColor: "#F6F6F6",
+    fontFamily: 'Roboto-400',
+    color: '#212121',
+    borderColor: '#E8E8E8',
+    backgroundColor: '#F6F6F6',
   },
   show: {
-    position: "absolute",
+    position: 'absolute',
     top: 16,
     right: 16,
   },
   showTitle: {
-    fontFamily: "Roboto-400",
+    fontFamily: 'Roboto-400',
     fontSize: 16,
-    color: "#1B4371",
+    color: '#1B4371',
   },
   btn: {
     marginTop: 43,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#FF6C00",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FF6C00',
     height: 50,
     borderRadius: 100,
   },
   btnTitle: {
     fontSize: 16,
-    color: "#fff",
+    color: '#fff',
   },
   linkTitle: {
     paddingTop: 16,
 
-    fontFamily: "Roboto-400",
+    fontFamily: 'Roboto-400',
     fontSize: 16,
-    textAlign: "center",
-    color: "#1B4371",
+    textAlign: 'center',
+    color: '#1B4371',
   },
 });

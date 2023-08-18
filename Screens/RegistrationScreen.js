@@ -1,21 +1,23 @@
-import { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
+  TouchableOpacity,
   ImageBackground,
-  View,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
+  View,
   Platform,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Image,
 } from "react-native";
+import { useEffect, useState } from "react";
 import bgimage from "../assets/img/bg-image.jpg";
-import avatar from "../assets/img/Avatar.jpg";
 import add from "../assets/img/add.png";
-import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { authSignUpUser } from "../../redux/auth/operations.js";
+import avatar from "../assets/img/Avatar.jpg";
 
 const initialState = {
   login: "",
@@ -27,7 +29,9 @@ export function RegistrationScreen() {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [dataInput, setDataInput] = useState(initialState);
   const [isShowPass, setIsShowPass] = useState(true);
+
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardWillShow", () => {
@@ -36,6 +40,8 @@ export function RegistrationScreen() {
     const hideSubscription = Keyboard.addListener("keyboardWillHide", () => {
       setIsShowKeyboard(false);
     });
+
+    setDataInput((prev) => ({ ...prev, avatar: avatarSource }));
 
     return () => {
       showSubscription.remove();
@@ -47,30 +53,27 @@ export function RegistrationScreen() {
     setIsShowKeyboard(true);
   }
 
-  function onHideKeyboard() {
-    setIsShowKeyboard(false);
-    Keyboard.dismiss();
-  }
-
   function onSubmit() {
     if (!dataInput.login || !dataInput.email || !dataInput.password)
-      return console.warn("Будь ласка заповніть всі поля!");
+      return console.warn("Заповніть всі поля!");
 
-    onHideKeyboard();
+    dispatch(authSignUpUser(dataInput));
+
     setIsShowPass(true);
-    console.log("state :>> ", dataInput);
     setDataInput(initialState);
-    navigation.navigate("Home");
   }
 
   function onLogin() {
-    console.log("Вже є акаунт? Увійти");
     navigation.navigate("Login");
   }
 
   return (
     <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={onHideKeyboard}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
+      >
         <ImageBackground style={styles.imageBG} source={bgimage}>
           <KeyboardAvoidingView
             style={styles.wrapForm}
@@ -81,7 +84,12 @@ export function RegistrationScreen() {
             >
               <View style={{ zIndex: 1 }}>
                 <Image style={styles.imgAvatar} source={avatar} />
-                <TouchableOpacity activeOpacity={0.5} onPress={() => {}}>
+                <TouchableOpacity
+                  activeOpacity={0.5}
+                  onPress={() => {
+                    console.log("add avatar");
+                  }}
+                >
                   <Image style={styles.imgAdd} source={add} />
                 </TouchableOpacity>
               </View>
@@ -90,15 +98,13 @@ export function RegistrationScreen() {
                 <Text style={styles.titleForm}>Реєстрація</Text>
               </View>
 
-              <View style={{ marginTop: 32 }}>
+              <View style={{ marginTop: 33 }}>
                 <TextInput
                   style={styles.input}
                   textAlign="left"
                   placeholder="Логін"
                   onFocus={onShowKeyboard}
-                  onBlur={() => {
-                    console.log("onBlur");
-                  }}
+                  onBlur={() => {}}
                   value={dataInput.login}
                   onChangeText={(value) =>
                     setDataInput((prev) => ({ ...prev, login: value }))
@@ -200,8 +206,8 @@ const styles = StyleSheet.create({
   },
   imgAdd: {
     position: "absolute",
-    top: 21,
-    left: "70%",
+    top: 14,
+    left: "62%",
   },
   titleForm: {
     marginTop: 92,
@@ -245,7 +251,6 @@ const styles = StyleSheet.create({
   },
   linkTitle: {
     paddingTop: 16,
-
     fontFamily: "Roboto-400",
     fontSize: 16,
     textAlign: "center",

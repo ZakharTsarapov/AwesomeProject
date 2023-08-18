@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
@@ -9,17 +9,41 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { useSelector } from 'react-redux';
+import { emailSelector, nickNameSelector } from '../redux/auth/selectors';
 import avatar from '../assets/img/Avatar.jpg';
 
 export function PostsScreen() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(null);
+  const nickName = useSelector(nickNameSelector);
+  const email = useSelector(emailSelector);
+
   const navigation = useNavigation();
-  const { params } = useRoute();
+
   useEffect(() => {
-    if (params) {
-      setPosts(prev => [...prev, params]);
+    getAllPostsFromServer();
+  }, []);
+
+  const getAllPostsFromServer = async () => {
+    try {
+      const q = collection(db, 'photoPosts');
+
+      const unsubscribe = onSnapshot(q, querySnapshot => {
+        let data = [];
+
+        querySnapshot.forEach(doc => {
+          data.push({ id: doc.id, ...doc.data() });
+        });
+
+        setPosts(data);
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
-  }, [params]);
+  };
 
   return (
     <View style={styles.container}>
@@ -40,7 +64,7 @@ export function PostsScreen() {
           <Text
             style={{ fontFamily: 'Roboto-700', fontSize: 13, color: '#212121' }}
           >
-            Natali Romanova
+            {nickName}
           </Text>
           <Text
             style={{
@@ -49,17 +73,17 @@ export function PostsScreen() {
               color: 'rgba(33, 33, 33, 0.80)',
             }}
           >
-            email@example.com
+            {email}
           </Text>
         </View>
       </View>
 
       <FlatList
         data={posts}
-        keyExtractor={(item, indx) => indx.toString()}
+        keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <View>
-            <View style={styles.wrapImage}>
+            <View>
               <Image
                 source={item.photo}
                 style={{
@@ -103,7 +127,10 @@ export function PostsScreen() {
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => {
-                      navigation.navigate('Comments');
+                      navigation.navigate('Comments', {
+                        postId: item.id,
+                        photo: item.photo,
+                      });
                     }}
                   >
                     <Feather name="message-circle" size={24} color="#BDBDBD" />
@@ -116,7 +143,7 @@ export function PostsScreen() {
                       fontSize: 16,
                     }}
                   >
-                    0
+                    {item.countComment ? item.countComment : 0}
                   </Text>
                 </View>
 
@@ -128,15 +155,11 @@ export function PostsScreen() {
                     }}
                     activeOpacity={0.8}
                     onPress={() => {
-                      navigation.navigate('Map', { location: params.location });
+                      navigation.navigate('Map', { location: item.location });
                     }}
                   >
                     <View>
-                      <Feather
-                        name="map-pin"
-                        size={24}
-                        color="#BDBDBD"
-                      />
+                      <Feather name="map-pin" size={24} color="#BDBDBD" />
                     </View>
 
                     <View style={{ marginLeft: 4 }}>
@@ -177,5 +200,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
   },
-  wrapImage: {},
 });
